@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إعدادية أسوار العلم للبنين - جدول الحصص الأسبوعي</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        aswar: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0a3751',
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.12)',
+                        'glow': '0 0 20px rgba(14, 165, 233, 0.35)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts - Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        * {
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Mobile Scrollbars */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Pulse Animation for Current Lesson */
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.92; transform: scale(1.01); }
+        }
+        .active-lesson-card {
+            animation: subtle-pulse 3s infinite ease-in-out;
+        }
+
+        /* Print Mode Adjustments */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .print-container { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .print-table { border-collapse: collapse !important; width: 100% !important; }
+            .print-table th, .print-table td { border: 1px solid #000 !important; padding: 6px !important; text-align: center !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full transition-colors duration-300 pb-24 md:pb-10">
+
+    <div id="app" class="max-w-md md:max-w-5xl mx-auto px-3 sm:px-6 pt-3">
+        
+        <!-- HEADER / BRANDING BANNER -->
+        <header class="no-print mb-3 bg-gradient-to-r from-aswar-800 via-aswar-700 to-indigo-900 text-white rounded-3xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
+            <!-- Decorative Background SVG Glow -->
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-sky-400/20 rounded-full blur-2xl"></div>
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl"></div>
+
+            <div class="relative z-10 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-2xl shadow-inner shrink-0">
+                        <i class="fa-solid fa-graduation-cap text-sky-300"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-lg sm:text-2xl font-black tracking-tight text-white">إعدادية أسوار العلم للبنين</h1>
+                            <span class="text-[10px] bg-sky-400/20 text-sky-200 border border-sky-300/30 font-extrabold px-2 py-0.5 rounded-full">2026-2027</span>
+                        </div>
+                        <p class="text-xs text-sky-200/90 font-medium">جدول الدروس الأسبوعي المعتمد</p>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button @click="toggleTheme" class="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 flex items-center justify-center text-amber-300 transition-all active:scale-90 shrink-0">
+                    <i :class="isDarkMode ? 'fa-solid fa-sun text-amber-300' : 'fa-solid fa-moon text-sky-200'"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- LIVE STATUS BANNER (REALTIME CLOCK & CURRENT LESSON) -->
+        <section class="no-print mb-3">
+            <div class="glass-card rounded-2xl p-3 sm:p-4 border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-500/10 dark:bg-sky-400/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-lg font-bold shrink-0">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                    <div>
+                        <div class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">التوقيت واليوم الحقيقي</div>
+                        <div class="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                            {{ realTimeDay }} - <span class="text-sky-600 dark:text-sky-400">{{ realTimeClock }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Lesson Indicator for Selected Class -->
+                <div class="text-left">
+                    <template v-if="currentPeriodObj">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            جارٍ الآن: الحصة {{ currentPeriodObj.period }}
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                            خارج أوقات الدوام
+                        </span>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLASS SELECTOR BAR (HORIZONTAL SWIPEABLE CHIPS) -->
+        <section class="no-print mb-3">
+            <div class="flex items-center justify-between mb-1.5 px-1">
+                <span class="text-xs font-extrabold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users-rectangle text-sky-500"></i> اختر الصف / الشعبة:
+                </span>
+                <span class="text-[11px] font-bold text-sky-600 dark:text-sky-400">
+                    {{ selectedClass }}
+                </span>
+            </div>
+            
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-0.5">
+                <button v-for="cls in classesList" :key="cls"
+                        @click="selectedClass = cls"
+                        :class="selectedClass === cls 
+                            ? 'bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-md shadow-sky-500/20 scale-100 font-black' 
+                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold'"
+                        class="px-4 py-2 rounded-2xl text-xs sm:text-sm whitespace-nowrap transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5">
+                    <i :class="cls.includes('الخامس') ? 'fa-solid fa-atom text-xs' : 'fa-solid fa-book text-xs'"></i>
+                    <span>{{ cls }}</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- DAY SELECTOR TABS & SEARCH BAR -->
+        <section class="no-print mb-4 space-y-2">
+            <!-- Day Pills Slider -->
+            <div class="bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-1 overflow-x-auto no-scrollbar">
+                <button v-for="day in daysList" :key="day"
+                        @click="selectedDay = day"
+                        :class="selectedDay === day 
+                            ? 'bg-sky-500 text-white shadow-sm font-black' 
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold'"
+                        class="flex-1 min-w-[70px] py-2 rounded-xl text-xs transition-all text-center whitespace-nowrap relative">
+                    <span>{{ day }}</span>
+                    <span v-if="realTimeDay === day" class="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                </button>
+                <button @click="selectedDay = 'جميع الأيام'"
+                        :class="selectedDay === 'جميع الأيام' 
+                            ? 'bg-indigo-600 text-white shadow-sm font-black' 
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold'"
+                        class="px-3 py-2 rounded-xl text-xs transition-all text-center whitespace-nowrap shrink-0">
+                    <i class="fa-solid fa-calendar-week ml-1"></i> الكلي
+                </button>
+            </div>
+
+            <!-- Search Input Bar -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3 text-slate-400 text-xs"></i>
+                <input v-model="searchQuery" type="text" placeholder="ابحث باسم المادة أو المدرس..." 
+                       class="w-full pr-9 pl-8 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-800 dark:text-slate-100">
+                <button v-if="searchQuery" @click="searchQuery=''" class="absolute left-3 top-2.5 text-slate-400 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- PRINT MODE TITLE -->
+        <div class="hidden print:block text-center mb-6">
+            <h1 class="text-2xl font-bold">إعدادية أسوار العلم للبنين - جدول الحصص الأسبوعي</h1>
+            <p class="text-sm text-slate-600 mt-1">الصف: {{ selectedClass }} | العام الدراسي 2026 - 2027</p>
+        </div>
+
+        <!-- MAIN SCHEDULE CONTENT -->
+        <main>
+            <!-- TIMELINE / MOBILE CARDS VIEW (When a single day or filter is active) -->
+            <div v-if="selectedDay !== 'جميع الأيام'" class="space-y-2.5">
+                
+                <!-- Day Header Badge -->
+                <div class="flex items-center justify-between px-1">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-sky-500"></span>
+                        <h2 class="text-base font-extrabold text-slate-800 dark:text-slate-100">
+                            جدول يوم {{ selectedDay }} ({{ selectedClass }})
+                        </h2>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400">6 حصص</span>
+                </div>
+
+                <!-- Lessons Cards List -->
+                <div v-if="filteredDayLessons.length > 0" class="space-y-2.5">
+                    <div v-for="lesson in filteredDayLessons" :key="lesson.id"
+                         :class="[
+                            getSubjectStyle(lesson.subject).cardBg,
+                            isCurrentActiveLesson(selectedDay, lesson.period) ? 'active-lesson-card ring-2 ring-sky-500 shadow-glow' : ''
+                         ]"
+                         class="rounded-2xl p-3.5 border border-slate-200/80 dark:border-slate-800/80 transition-all relative overflow-hidden">
+                        
+                        <!-- Accent Top Color Bar -->
+                        <div :class="getSubjectStyle(lesson.subject).barBg" class="absolute top-0 right-0 left-0 h-1"></div>
+
+                        <div class="flex items-center justify-between gap-2">
+                            <!-- Left: Period Info & Time -->
+                            <div class="flex items-center gap-3">
+                                <div :class="getSubjectStyle(lesson.subject).badgeBg"
+                                     class="w-11 h-11 rounded-2xl flex flex-col items-center justify-center text-white shadow-sm shrink-0">
+                                    <i :class="getSubjectStyle(lesson.subject).icon" class="text-sm"></i>
+                                    <span class="text-[10px] font-black mt-0.5">حـ {{ lesson.period }}</span>
+                                </div>
+
+                                <div>
+                                    <!-- Subject Name -->
+                                    <h3 class="font-extrabold text-base leading-tight text-slate-900 dark:text-slate-100">
+                                        {{ lesson.subject }}
+                                    </h3>
+                                    
+                                    <!-- Teacher Name -->
+                                    <div class="flex items-center gap-1.5 mt-1 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                        <i class="fa-solid fa-user-tie text-[11px] text-sky-500"></i>
+                                        <span>الأستاذ: {{ lesson.teacher }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Time & Mobile Action Buttons -->
+                            <div class="text-left flex flex-col items-end gap-1 shrink-0">
+                                <span class="text-[11px] font-mono font-bold bg-white/70 dark:bg-slate-900/70 px-2 py-0.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 text-slate-600 dark:text-slate-300">
+                                    <i class="fa-regular fa-clock text-[9px] ml-0.5"></i>
+                                    {{ getPeriodTimeStr(lesson.period) }}
+                                </span>
+
+                                <div class="no-print flex items-center gap-1.5 mt-1">
+                                    <button @click="openEditModal(lesson)" class="w-7 h-7 rounded-lg bg-white/80 dark:bg-slate-900/80 hover:bg-sky-500 hover:text-white text-slate-500 dark:text-slate-400 flex items-center justify-center text-xs transition-colors shadow-xs" title="تعديل">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button @click="confirmDelete(lesson)" class="w-7 h-7 rounded-lg bg-white/80 dark:bg-slate-900/80 hover:bg-rose-500 hover:text-white text-rose-500 flex items-center justify-center text-xs transition-colors shadow-xs" title="حذف">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else class="text-center py-12 glass-card rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+                    <i class="fa-solid fa-folder-open text-3xl text-slate-300 dark:text-slate-700 mb-2"></i>
+                    <p class="text-xs font-bold text-slate-400">لا توجد دروس مطابقة للبحث يوم {{ selectedDay }}</p>
+                </div>
+            </div>
+
+            <!-- WEEKLY FULL GRID / TABLE VIEW (When 'جميع الأيام' is active or for print) -->
+            <div v-else class="glass-card rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse min-w-[650px] text-right text-xs print-table">
+                        <thead>
+                            <tr class="bg-slate-100/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
+                                <th class="p-2.5 text-center font-extrabold w-20 border-l border-slate-200 dark:border-slate-800">الحصة</th>
+                                <th v-for="d in daysList" :key="d" class="p-2.5 text-center font-extrabold border-l border-slate-200 dark:border-slate-800 last:border-l-0">
+                                    {{ d }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                            <tr v-for="p in 6" :key="p" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                                <td class="p-2 text-center font-black bg-slate-50/80 dark:bg-slate-900/50 border-l border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
+                                    <div>الحصة {{ p }}</div>
+                                    <div class="text-[9px] font-normal text-slate-400 mt-0.5">{{ getPeriodTimeStr(p) }}</div>
+                                </td>
+                                <td v-for="d in daysList" :key="d" class="p-1.5 border-l border-slate-200 dark:border-slate-800 last:border-l-0 align-top h-20">
+                                    <template v-with="{ lesson: getLessonForSlot(selectedClass, d, p) }">
+                                        <div v-if="getLessonForSlot(selectedClass, d, p)"
+                                             :class="getSubjectStyle(getLessonForSlot(selectedClass, d, p).subject).cardBg"
+                                             class="h-full rounded-xl p-2 border border-slate-200/60 dark:border-slate-800/60 flex flex-col justify-between">
+                                            <div>
+                                                <div class="font-extrabold text-xs text-slate-900 dark:text-white line-clamp-1">
+                                                    {{ getLessonForSlot(selectedClass, d, p).subject }}
+                                                </div>
+                                                <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                                    {{ getLessonForSlot(selectedClass, d, p).teacher }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-else class="h-full rounded-xl border border-dashed border-slate-200 dark:border-slate-800/50 flex items-center justify-center text-slate-300 dark:text-slate-700 text-[10px]">
+                                            فارغ
+                                        </div>
+                                    </template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- BOTTOM MOBILE ACTION BAR (FIXED ERGONOMIC NAVIGATION) -->
+        <nav class="no-print fixed bottom-3 left-3 right-3 max-w-md mx-auto bg-slate-900/90 dark:bg-slate-950/90 backdrop-blur-xl text-white rounded-2xl p-2 shadow-2xl border border-white/10 flex items-center justify-around z-40">
+            <button @click="openAddModal()" class="flex flex-col items-center gap-0.5 text-sky-400 active:scale-95 transition-all">
+                <i class="fa-solid fa-circle-plus text-lg"></i>
+                <span class="text-[10px] font-extrabold">إضافة حصة</span>
+            </button>
+
+            <button @click="printSchedule" class="flex flex-col items-center gap-0.5 text-slate-300 hover:text-white active:scale-95 transition-all">
+                <i class="fa-solid fa-print text-base"></i>
+                <span class="text-[10px] font-bold">طباعة</span>
+            </button>
+
+            <button @click="resetToOfficialSchedule" class="flex flex-col items-center gap-0.5 text-amber-400 active:scale-95 transition-all">
+                <i class="fa-solid fa-rotate-right text-base"></i>
+                <span class="text-[10px] font-bold">جدول أسوار العلم</span>
+            </button>
+
+            <button @click="showMoreMenu = !showMoreMenu" class="flex flex-col items-center gap-0.5 text-slate-300 hover:text-white active:scale-95 transition-all">
+                <i class="fa-solid fa-ellipsis text-base"></i>
+                <span class="text-[10px] font-bold">المزيد</span>
+            </button>
+        </nav>
+
+        <!-- MORE OPTIONS MODAL MENU -->
+        <div v-if="showMoreMenu" class="no-print fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-end justify-center p-3" @click.self="showMoreMenu = false">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3 animate-in slide-in-from-bottom duration-200">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <h3 class="font-extrabold text-sm text-slate-800 dark:text-white">خيارات وأدوات إضافية</h3>
+                    <button @click="showMoreMenu = false" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button @click="exportData(); showMoreMenu=false;" class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-right flex flex-col gap-1">
+                        <i class="fa-solid fa-file-export text-sky-500 text-lg"></i>
+                        <span class="text-xs font-bold text-slate-800 dark:text-white">تصدير الجدول (JSON)</span>
+                    </button>
+
+                    <label class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-right flex flex-col gap-1 cursor-pointer">
+                        <i class="fa-solid fa-file-import text-emerald-500 text-lg"></i>
+                        <span class="text-xs font-bold text-slate-800 dark:text-white">استيراد جدول</span>
+                        <input type="file" accept=".json" @change="importData" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD / EDIT LESSON MODAL -->
+        <div v-if="showModal" class="no-print fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
+                        <i :class="isEditing ? 'fa-solid fa-pen text-sky-500' : 'fa-solid fa-plus-circle text-emerald-500'"></i>
+                        <span>{{ isEditing ? 'تعديل الحصة الدراسية' : 'إضافة حصة جديدة' }}</span>
+                    </h3>
+                    <button @click="showModal = false" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+
+                <form @submit.prevent="saveLesson" class="p-4 space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">الصف / الشعبة</label>
+                        <select v-model="form.className" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white">
+                            <option v-for="c in classesList" :key="c" :value="c">{{ c }}</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">اليوم</label>
+                            <select v-model="form.day" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white">
+                                <option v-for="d in daysList" :key="d" :value="d">{{ d }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">رقم الحصة</label>
+                            <select v-model.number="form.period" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white">
+                                <option v-for="p in 6" :key="p" :value="p">الحصة {{ p }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">المادة الدراسية</label>
+                        <input v-model="form.subject" required type="text" placeholder="مثال: الرياضيات، العربي..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">اسم الأستاذ / المدرس</label>
+                        <input v-model="form.teacher" required type="text" placeholder="مثال: عادل، مصطفى..." class="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button type="button" @click="showModal = false" class="px-4 py-2 text-xs font-bold text-slate-500">إلغاء</button>
+                        <button type="submit" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs rounded-xl shadow-md">
+                            {{ isEditing ? 'حفظ التعديلات' : 'إضافة الحصة' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- DELETE CONFIRMATION MODAL -->
+        <div v-if="deleteTarget" class="no-print fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+            <div class="bg-white dark:bg-slate-900 w-full max-w-xs rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center text-xl mx-auto mb-3">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white mb-1">حذف هذه الحصة؟</h3>
+                <p class="text-xs text-slate-400 mb-4">هل أنت متاكد من حذف مادة {{ deleteTarget.subject }} (الأستاذ {{ deleteTarget.teacher }})؟</p>
+                <div class="flex items-center gap-2">
+                    <button @click="deleteTarget = null" class="w-1/2 py-2 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-xl">إلغاء</button>
+                    <button @click="executeDelete" class="w-1/2 py-2 text-xs font-extrabold text-white bg-rose-600 rounded-xl shadow-sm">تأكيد الحذف</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <transition name="fade">
+            <div v-if="toastMessage" class="no-print fixed top-4 left-4 right-4 max-w-xs mx-auto bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-2 z-50">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span>{{ toastMessage }}</span>
+            </div>
+        </transition>
+
+    </div>
+
+    <!-- VUE 3 LOGIC & OFFICIAL SCHOOL DATA -->
+    <script>
+        const { createApp, ref, computed, onMounted, onUnmounted } = Vue;
+
+        createApp({
+            setup() {
+                const classesList = ['الرابع (أ)', 'الرابع (ب)', 'الرابع (ج)', 'الرابع (د)', 'الخامس العلمي (أ)', 'الخامس العلمي (ب)'];
+                const daysList = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+                
+                const selectedClass = ref('الرابع (أ)');
+                const selectedDay = ref('الأحد');
+                const searchQuery = ref('');
+                const isDarkMode = ref(false);
+                
+                const showModal = ref(false);
+                const isEditing = ref(false);
+                const showMoreMenu = ref(false);
+                const deleteTarget = ref(null);
+                const toastMessage = ref('');
+
+                const form = ref({
+                    id: null,
+                    className: 'الرابع (أ)',
+                    day: 'الأحد',
+                    period: 1,
+                    subject: '',
+                    teacher: ''
+                });
+
+                const schedule = ref([]);
+
+                // Clock State
+                const now = ref(new Date());
+                let clockTimer = null;
+
+                onMounted(() => {
+                    clockTimer = setInterval(() => { now.value = new Date(); }, 1000);
+
+                    // Load saved theme
+                    if (localStorage.getItem('aswar_theme') === 'dark' || (!localStorage.getItem('aswar_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        isDarkMode.value = true;
+                        document.documentElement.classList.add('dark');
+                    }
+
+                    // Load schedule
+                    loadScheduleData();
+                });
+
+                onUnmounted(() => {
+                    if (clockTimer) clearInterval(clockTimer);
+                });
+
+                // Realtime clock format
+                const realTimeClock = computed(() => {
+                    return now.value.toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' });
+                });
+
+                const realTimeDay = computed(() => {
+                    const daysMap = { 0: 'الأحد', 1: 'الإثنين', 2: 'الثلاثاء', 3: 'الأربعاء', 4: 'الخميس', 5: 'الجمعة', 6: 'السبت' };
+                    return daysMap[now.value.getDay()] || 'الأحد';
+                });
+
+                // Get default timing string for periods
+                const getPeriodTimeStr = (period) => {
+                    const times = {
+                        1: '08:00 - 08:45',
+                        2: '08:50 - 09:35',
+                        3: '09:40 - 10:25',
+                        4: '10:45 - 11:30',
+                        5: '11:35 - 12:20',
+                        6: '12:25 - 01:10'
+                    };
+                    return times[period] || '';
+                };
+
+                // Current period detection
+                const currentPeriodObj = computed(() => {
+                    const curHours = now.value.getHours().toString().padStart(2, '0');
+                    const curMins = now.value.getMinutes().toString().padStart(2, '0');
+                    const timeStr = `${curHours}:${curMins}`;
+
+                    const periodRanges = [
+                        { period: 1, start: '08:00', end: '08:45' },
+                        { period: 2, start: '08:50', end: '09:35' },
+                        { period: 3, start: '09:40', end: '10:25' },
+                        { period: 4, start: '10:45', end: '11:30' },
+                        { period: 5, start: '11:35', end: '12:20' },
+                        { period: 6, start: '12:25', end: '13:10' },
+                    ];
+
+                    return periodRanges.find(p => timeStr >= p.start && timeStr <= p.end);
+                });
+
+                const isCurrentActiveLesson = (day, period) => {
+                    if (day !== realTimeDay.value) return false;
+                    return currentPeriodObj.value && currentPeriodObj.value.period === period;
+                };
+
+                // Filtered Lessons for Selected Day & Selected Class
+                const filteredDayLessons = computed(() => {
+                    return schedule.value
+                        .filter(item => item.className === selectedClass.value && item.day === selectedDay.value)
+                        .filter(item => {
+                            if (!searchQuery.value.trim()) return true;
+                            const q = searchQuery.value.toLowerCase().trim();
+                            return item.subject.toLowerCase().includes(q) || item.teacher.toLowerCase().includes(q);
+                        })
+                        .sort((a, b) => a.period - b.period);
+                });
+
+                const getLessonForSlot = (cls, day, period) => {
+                    return schedule.value.find(item => item.className === cls && item.day === day && item.period === period);
+                };
+
+                // Subject Style and Icon Mapping
+                const getSubjectStyle = (subject) => {
+                    if (!subject) return { cardBg: 'bg-slate-50 dark:bg-slate-900', badgeBg: 'bg-slate-500', barBg: 'bg-slate-500', icon: 'fa-solid fa-book' };
+                    
+                    const sub = subject.trim();
+                    if (sub.includes('عربي') || sub.includes('العربي')) {
+                        return { cardBg: 'bg-emerald-500/10 dark:bg-emerald-950/40', badgeBg: 'bg-emerald-600', barBg: 'bg-emerald-500', icon: 'fa-solid fa-book-open' };
+                    }
+                    if (sub.includes('رياضيات') || sub.includes('الرياضيات')) {
+                        return { cardBg: 'bg-indigo-500/10 dark:bg-indigo-950/40', badgeBg: 'bg-indigo-600', barBg: 'bg-indigo-500', icon: 'fa-solid fa-calculator' };
+                    }
+                    if (sub.includes('أحياء') || sub.includes('الأحياء')) {
+                        return { cardBg: 'bg-rose-500/10 dark:bg-rose-950/40', badgeBg: 'bg-rose-600', barBg: 'bg-rose-500', icon: 'fa-solid fa-dna' };
+                    }
+                    if (sub.includes('فيزياء') || sub.includes('الفيزياء')) {
+                        return { cardBg: 'bg-sky-500/10 dark:bg-sky-950/40', badgeBg: 'bg-sky-600', barBg: 'bg-sky-500', icon: 'fa-solid fa-atom' };
+                    }
+                    if (sub.includes('كيمياء') || sub.includes('الكيمياء')) {
+                        return { cardBg: 'bg-purple-500/10 dark:bg-purple-950/40', badgeBg: 'bg-purple-600', barBg: 'bg-purple-500', icon: 'fa-solid fa-flask' };
+                    }
+                    if (sub.includes('إنكليزي') || sub.includes('الانكليزي') || sub.includes('الإنكليزي')) {
+                        return { cardBg: 'bg-amber-500/10 dark:bg-amber-950/40', badgeBg: 'bg-amber-600', barBg: 'bg-amber-500', icon: 'fa-solid fa-language' };
+                    }
+                    if (sub.includes('إسلامية') || sub.includes('الإسلامية')) {
+                        return { cardBg: 'bg-teal-500/10 dark:bg-teal-950/40', badgeBg: 'bg-teal-600', barBg: 'bg-teal-500', icon: 'fa-solid fa-kaaba' };
+                    }
+                    if (sub.includes('كردي') || sub.includes('الكردي')) {
+                        return { cardBg: 'bg-cyan-500/10 dark:bg-cyan-950/40', badgeBg: 'bg-cyan-600', barBg: 'bg-cyan-500', icon: 'fa-solid fa-globe' };
+                    }
+                    if (sub.includes('فنية') || sub.includes('الفنية')) {
+                        return { cardBg: 'bg-fuchsia-500/10 dark:bg-fuchsia-950/40', badgeBg: 'bg-fuchsia-600', barBg: 'bg-fuchsia-500', icon: 'fa-solid fa-palette' };
+                    }
+                    if (sub.includes('رياضة') || sub.includes('الرياضة')) {
+                        return { cardBg: 'bg-lime-500/10 dark:bg-lime-950/40', badgeBg: 'bg-lime-600', barBg: 'bg-lime-500', icon: 'fa-solid fa-volleyball' };
+                    }
+
+                    return { cardBg: 'bg-blue-500/10 dark:bg-blue-950/40', badgeBg: 'bg-blue-600', barBg: 'bg-blue-500', icon: 'fa-solid fa-bookmark' };
+                };
+
+                // Theme Switcher
+                const toggleTheme = () => {
+                    isDarkMode.value = !isDarkMode.value;
+                    if (isDarkMode.value) {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('aswar_theme', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('aswar_theme', 'light');
+                    }
+                };
+
+                // Add / Edit Lesson Logic
+                const openAddModal = () => {
+                    isEditing.value = false;
+                    form.value = { id: Date.now(), className: selectedClass.value, day: selectedDay.value === 'جميع الأيام' ? 'الأحد' : selectedDay.value, period: 1, subject: '', teacher: '' };
+                    showModal.value = true;
+                };
+
+                const openEditModal = (lesson) => {
+                    isEditing.value = true;
+                    form.value = { ...lesson };
+                    showModal.value = true;
+                };
+
+                const saveLesson = () => {
+                    if (isEditing.value) {
+                        const idx = schedule.value.findIndex(i => i.id === form.value.id);
+                        if (idx !== -1) schedule.value[idx] = { ...form.value };
+                        showToast('تم تعديل الحصة بنجاح');
+                    } else {
+                        const existingIdx = schedule.value.findIndex(i => i.className === form.value.className && i.day === form.value.day && i.period === form.value.period);
+                        if (existingIdx !== -1) {
+                            schedule.value[existingIdx] = { ...form.value };
+                        } else {
+                            schedule.value.push({ ...form.value });
+                        }
+                        showToast('تمت إضافة الحصة بنجاح');
+                    }
+                    saveScheduleToStorage();
+                    showModal.value = false;
+                };
+
+                const confirmDelete = (lesson) => {
+                    deleteTarget.value = lesson;
+                };
+
+                const executeDelete = () => {
+                    if (deleteTarget.value) {
+                        schedule.value = schedule.value.filter(i => i.id !== deleteTarget.value.id);
+                        saveScheduleToStorage();
+                        showToast('تم حذف الحصة');
+                        deleteTarget.value = null;
+                    }
+                };
+
+                const saveScheduleToStorage = () => {
+                    localStorage.setItem('aswar_schedule_data_v2', JSON.stringify(schedule.value));
+                };
+
+                const loadScheduleData = () => {
+                    const saved = localStorage.getItem('aswar_schedule_data_v2');
+                    if (saved) {
+                        try {
+                            schedule.value = JSON.parse(saved);
+                        } catch (e) {
+                            loadOfficialDefaultData();
+                        }
+                    } else {
+                        loadOfficialDefaultData();
+                    }
+                };
+
+                // FULL OFFICIAL DATA FOR ASWAR AL-ILM HIGH SCHOOL (180 PERIODS COMPLETE)
+                const loadOfficialDefaultData = () => {
+                    const rawData = [
+                        // [الرابع أ]
+                        // الأحد
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 1, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 2, s: 'الأحياء', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 3, s: 'الرياضيات', t: 'محمد رحيم' },
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 4, s: 'الفيزياء', t: 'محمد' },
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 5, s: 'الأحياء', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الأحد', p: 6, s: 'الإنكليزي', t: 'ذاكر' },
+                        // الإثنين
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 1, s: 'الإسلامية', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 2, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 3, s: 'الرياضة', t: 'أحمد' },
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 4, s: 'الإنكليزي', t: 'ذاكر' },
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 5, s: 'الكردي', t: 'أحمد' },
+                        { c: 'الرابع (أ)', d: 'الإثنين', p: 6, s: 'الفيزياء', t: 'محمد داود' },
+                        // الثلاثاء
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 1, s: 'الفيزياء', t: 'مصطفى' },
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 2, s: 'الأحياء', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 3, s: 'الكردي', t: 'أحمد' },
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 4, s: 'الكيمياء', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 5, s: 'العربي', t: 'شاكر' },
+                        { c: 'الرابع (أ)', d: 'الثلاثاء', p: 6, s: 'الرياضة', t: 'عادل' },
+                        // الأربعاء
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 1, s: 'الإسلامية', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 2, s: 'الكردي', t: 'أحمد' },
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 3, s: 'الرياضيات', t: 'مصطفى' },
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 4, s: 'الإنكليزي', t: 'ذاكر' },
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 5, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الأربعاء', p: 6, s: 'الكيمياء', t: 'مصطفى' },
+                        // الخميس
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 1, s: 'الرياضيات', t: 'عادل' },
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 2, s: 'الإنكليزي', t: 'ذاكر' },
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 3, s: 'الفيزياء', t: 'محمد' },
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 4, s: 'الفنية', t: 'أحمد' },
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 5, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (أ)', d: 'الخميس', p: 6, s: 'الإنكليزي', t: 'ذاكر' },
+
+                        // [الرابع ب]
+                        // الأحد
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 1, s: 'العربي', t: 'علي' },
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 2, s: 'الإسلامية', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 3, s: 'الرياضيات', t: 'أحمد' },
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 4, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 5, s: 'الفيزياء', t: 'محمد' },
+                        { c: 'الرابع (ب)', d: 'الأحد', p: 6, s: 'الفيزياء', t: 'مجيد' },
+                        // الإثنين
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 1, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 2, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 3, s: 'الأحياء', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 4, s: 'الفنية', t: 'شاكر' },
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 5, s: 'الفيزياء', t: 'محمد شمس' },
+                        { c: 'الرابع (ب)', d: 'الإثنين', p: 6, s: 'الكردي', t: 'ذاكر' },
+                        // الثلاثاء
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 1, s: 'الفيزياء', t: 'محمد' },
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 2, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 3, s: 'الكردي', t: 'أحمد' },
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 4, s: 'الرياضيات', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 5, s: 'الإنكليزي', t: 'ذاكر' },
+                        { c: 'الرابع (ب)', d: 'الثلاثاء', p: 6, s: 'الكردي', t: 'شاكر' },
+                        // الأربعاء
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 1, s: 'الأحياء', t: 'مصطفى' },
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 2, s: 'الإسلامية', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 3, s: 'الرياضيات', t: 'أحمد' },
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 4, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 5, s: 'الإنكليزي', t: 'ذاكر' },
+                        { c: 'الرابع (ب)', d: 'الأربعاء', p: 6, s: 'الفيزياء', t: 'شاكر' },
+                        // الخميس
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 1, s: 'الإنكليزي', t: 'شاكر' },
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 2, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 3, s: 'الفيزياء', t: 'مجيد' },
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 4, s: 'العربي', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 5, s: 'الرياضيات', t: 'عادل' },
+                        { c: 'الرابع (ب)', d: 'الخميس', p: 6, s: 'الأحياء', t: 'مجيد' },
+
+                        // [الرابع ج]
+                        // الأحد
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 1, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 2, s: 'الإسلامية', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 3, s: 'الرياضيات', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 4, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 5, s: 'الإنكليزي', t: 'ورد' },
+                        { c: 'الرابع (ج)', d: 'الأحد', p: 6, s: 'العربي', t: 'حيدر' },
+                        // الإثنين
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 1, s: 'الأحياء', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 2, s: 'الإنكليزي', t: 'ورد' },
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 3, s: 'الفنية', t: 'محمد شمس' },
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 4, s: 'الرياضيات', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 5, s: 'الرياضة', t: 'أوميد' },
+                        { c: 'الرابع (ج)', d: 'الإثنين', p: 6, s: 'الفنية', t: 'حيدر' },
+                        // الثلاثاء
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 1, s: 'الأحياء', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 2, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 3, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 4, s: 'الرياضيات', t: 'ورد' },
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 5, s: 'الكردي', t: 'علي' },
+                        { c: 'الرابع (ج)', d: 'الثلاثاء', p: 6, s: 'الإسلامية', t: 'حيدر' },
+                        // الأربعاء
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 1, s: 'الرياضيات', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 2, s: 'الكردي', t: 'أوميد' },
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 3, s: 'الإسلامية', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 4, s: 'الفيزياء', t: 'محمد' },
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 5, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الأربعاء', p: 6, s: 'الأحياء', t: 'مصطفى' },
+                        // الخميس
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 1, s: 'الإنكليزي', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 2, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 3, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 4, s: 'الرياضيات', t: 'ورد' },
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 5, s: 'الفيزياء', t: 'حيدر' },
+                        { c: 'الرابع (ج)', d: 'الخميس', p: 6, s: 'الإسلامية', t: 'حيدر' },
+
+                        // [الرابع د]
+                        // الأحد
+                        { c: 'الرابع (د)', d: 'الأحد', p: 1, s: 'الإنكليزي', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الأحد', p: 2, s: 'الفيزياء', t: 'علي' },
+                        { c: 'الرابع (د)', d: 'الأحد', p: 3, s: 'الأحياء', t: 'محمد' },
+                        { c: 'الرابع (د)', d: 'الأحد', p: 4, s: 'العربي', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الأحد', p: 5, s: 'الإنكليزي', t: 'ورد' },
+                        { c: 'الرابع (د)', d: 'الأحد', p: 6, s: 'الرياضيات', t: 'مصطفى' },
+                        // الإثنين
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 1, s: 'الكردي', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 2, s: 'الفنية', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 3, s: 'الإنكليزي', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 4, s: 'الإسلامية', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 5, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الإثنين', p: 6, s: 'الرياضيات', t: 'حيدر' },
+                        // الثلاثاء
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 1, s: 'الرياضيات', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 2, s: 'الكردي', t: 'عباس' },
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 3, s: 'الأحياء', t: 'علي' },
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 4, s: 'العربي', t: 'جواد' },
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 5, s: 'الإنكليزي', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الثلاثاء', p: 6, s: 'الكيمياء', t: 'مصطفى' },
+                        // الأربعاء
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 1, s: 'الرياضيات', t: 'ورد' },
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 2, s: 'العربي', t: 'قياس' },
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 3, s: 'الرياضة', t: 'علي' },
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 4, s: 'الإنكليزي', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 5, s: 'الكيمياء', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الأربعاء', p: 6, s: 'العربي', t: 'أوميد' },
+                        // الخميس
+                        { c: 'الرابع (د)', d: 'الخميس', p: 1, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الخميس', p: 2, s: 'العربي', t: 'حيدر' },
+                        { c: 'الرابع (د)', d: 'الخميس', p: 3, s: 'الكردي', t: 'عباس' },
+                        { c: 'الرابع (د)', d: 'الخميس', p: 4, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الرابع (د)', d: 'الخميس', p: 5, s: 'الرياضيات', t: 'ورد' },
+                        { c: 'الرابع (د)', d: 'الخميس', p: 6, s: 'الفيزياء', t: 'مصطفى' },
+
+                        // [الخامس العلمي أ]
+                        // الأحد
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 1, s: 'الإسلامية', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 2, s: 'الإنكليزي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 3, s: 'الرياضيات', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 4, s: 'العربي', t: 'ورد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 5, s: 'الرياضيات', t: 'محمد شمس' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأحد', p: 6, s: 'العربي', t: 'مجيد' },
+                        // الإثنين
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 1, s: 'الأحياء', t: 'محمد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 2, s: 'العربي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 3, s: 'الإنكليزي', t: 'أريان' },
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 4, s: 'الرياضة', t: 'حسام' },
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 5, s: 'الفنية', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الإثنين', p: 6, s: 'الأحياء', t: 'محمد شمس' },
+                        // الثلاثاء
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 1, s: 'العربي', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 2, s: 'الرياضيات', t: 'ورد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 3, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 4, s: 'الكردي', t: 'عباس' },
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 5, s: 'الفيزياء', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الثلاثاء', p: 6, s: 'الفيزياء', t: 'مصطفى' },
+                        // الأربعاء
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 1, s: 'العربي', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 2, s: 'الرياضيات', t: 'أريان' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 3, s: 'الرياضة', t: 'نبال' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 4, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 5, s: 'الإنكليزي', t: 'ورد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الأربعاء', p: 6, s: 'الفيزياء', t: 'محمد شمس' },
+                        // الخميس
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 1, s: 'الفنية', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 2, s: 'العربي', t: 'حسام' },
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 3, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 4, s: 'الرياضيات', t: 'مجيد' },
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 5, s: 'الكردي', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (أ)', d: 'الخميس', p: 6, s: 'الإنكليزي', t: 'مصطفى' },
+
+                        // [الخامس العلمي ب]
+                        // الأحد
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 1, s: 'الأحياء', t: 'مجيد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 2, s: 'العربي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 3, s: 'الإنكليزي', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 4, s: 'الرياضيات', t: 'أحمد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 5, s: 'الإنكليزي', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأحد', p: 6, s: 'الأحياء', t: 'مجيد' },
+                        // الإثنين
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 1, s: 'الإنكليزي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 2, s: 'الكردي', t: 'أريان' },
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 3, s: 'الرياضيات', t: 'محمد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 4, s: 'العربي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 5, s: 'الأحياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الإثنين', p: 6, s: 'الكيمياء', t: 'مصطفى' },
+                        // الثلاثاء
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 1, s: 'الكيمياء', t: 'مصطفى' },
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 2, s: 'الأحياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 3, s: 'الإسلامية', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 4, s: 'الإنكليزي', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 5, s: 'الفيزياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الثلاثاء', p: 6, s: 'الرياضيات', t: 'حسام' },
+                        // الأربعاء
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 1, s: 'الرياضيات', t: 'أحمد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 2, s: 'الفيزياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 3, s: 'الفيزياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 4, s: 'الرياضة', t: 'أحمد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 5, s: 'الفنية', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الأربعاء', p: 6, s: 'الإنكليزي', t: 'حسام' },
+                        // الخميس
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 1, s: 'الرياضيات', t: 'أحمد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 2, s: 'الكردي', t: 'عباس' },
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 3, s: 'الفيزياء', t: 'عباس' },
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 4, s: 'العربي', t: 'مجيد' },
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 5, s: 'الأحياء', t: 'حسام' },
+                        { c: 'الخامس العلمي (ب)', d: 'الخميس', p: 6, s: 'الإسلامية', t: 'مجيد' }
+                    ];
+
+                    let idCounter = 1;
+                    schedule.value = rawData.map(item => ({
+                        id: idCounter++,
+                        className: item.c,
+                        day: item.d,
+                        period: item.p,
+                        subject: item.s,
+                        teacher: item.t
+                    }));
+
+                    saveScheduleToStorage();
+                };
+
+                const resetToOfficialSchedule = () => {
+                    loadOfficialDefaultData();
+                    showToast('تمت استعادة جدول إعدادية أسوار العلم الأصلي');
+                };
+
+                const exportData = () => {
+                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(schedule.value, null, 2));
+                    const a = document.createElement('a');
+                    a.href = dataStr;
+                    a.download = `جدول_حصص_أسوار_العلم_${selectedClass.value.replace(/\s+/g, '_')}.json`;
+                    a.click();
+                };
+
+                const importData = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        try {
+                            const data = JSON.parse(evt.target.result);
+                            if (Array.isArray(data)) {
+                                schedule.value = data;
+                                saveScheduleToStorage();
+                                showToast('تم استيراد جدول الحصص بنجاح');
+                            }
+                        } catch (err) {
+                            showToast('خطأ في ملف الاستيراد');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+
+                const printSchedule = () => {
+                    window.print();
+                };
+
+                const showToast = (msg) => {
+                    toastMessage.value = msg;
+                    setTimeout(() => { toastMessage.value = ''; }, 3000);
+                };
+
+                return {
+                    classesList,
+                    daysList,
+                    selectedClass,
+                    selectedDay,
+                    searchQuery,
+                    isDarkMode,
+                    showModal,
+                    isEditing,
+                    showMoreMenu,
+                    deleteTarget,
+                    form,
+                    realTimeClock,
+                    realTimeDay,
+                    currentPeriodObj,
+                    filteredDayLessons,
+                    toastMessage,
+                    getPeriodTimeStr,
+                    isCurrentActiveLesson,
+                    getLessonForSlot,
+                    getSubjectStyle,
+                    toggleTheme,
+                    openAddModal,
+                    openEditModal,
+                    saveLesson,
+                    confirmDelete,
+                    executeDelete,
+                    resetToOfficialSchedule,
+                    exportData,
+                    importData,
+                    printSchedule
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
